@@ -307,6 +307,7 @@ clienteCtrl.authCliente = async (req, res, next) => {
 	const { email } = req.body;
 	const contrasena = req.body.contrasena;
 	const admin = await adminModel.findOne({ email });
+	console.log(admin);
 	if (admin) {
 		try {
 			if (!bcrypt.compareSync(contrasena, admin.contrasena)) {
