@@ -17,13 +17,13 @@ router.route('/')
 router.route('/limite')
     .get(obtenerLimiteCarousels)
 
-router.route('/nuevo/:idProducto')
-    .post(auth,subirImagen, crearCarousel)
+router.route('/nuevo/')
+    .post(subirImagen, crearCarousel)
 
-router.route('/:idProducto')
+router.route('/:idCourrucel')
     .get(obtenerCarousel)
-    .put(auth,subirImagen, actualizarCarousel)
-    .delete(auth,eliminarCarousel)
+    .put(subirImagen, actualizarCarousel)
+    .delete(eliminarCarousel)
 
 
 module.exports = router;

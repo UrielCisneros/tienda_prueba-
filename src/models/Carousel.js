@@ -1,10 +1,8 @@
 const { Schema, model } = require('mongoose');
 
 const CarouselSchema = new Schema({
-    producto: {
-        type: Schema.ObjectId,
-        ref: 'producto'
-    },
+    producto: String,
+    nombre: String,
     imagen: String
 },
 {

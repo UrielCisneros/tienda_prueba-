@@ -17,7 +17,7 @@ blogCtrl.getBlogs = async (req, res) => {
     const options = {
         page,
         limit: parseInt(limit),
-        sort: { createdAt: "asc" }
+        sort: { createdAt: -1 }
     }
     blogModel.paginate({}, options, (err, postStored) => {
         if (err) {
