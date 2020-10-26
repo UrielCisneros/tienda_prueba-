@@ -16,6 +16,11 @@ sendEmail.sendEmail = (emailAdmin,action,htmlContent,service) => {
 		}
 	})
 
+	console.log(process.env.USER_EMAIL);
+	console.log(process.env.PASS_EMAIL);
+	console.log(process.env.HOST_EMAIL);
+	console.log(process.env.PORT_EMAIL);
+
 	const info = transporter.sendMail({
 		from:` '${service}' <${process.env.USER_EMAIL}>`,
 		to: emailAdmin,
