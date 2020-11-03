@@ -27,7 +27,7 @@ const {
 	categoriasAgrupadas,
 	subCategorias,
 	getPromocionesPaginadas,
-	
+	importacionExcel
 } = require('../controllers/productos.controllers');
 const auth = require('../middleware/auth');
 
@@ -67,5 +67,7 @@ router.route('/action/:id/numero/:idnumero').delete(auth,eliminarNumero).put(aut
 router.route('/promocion/:id').put(auth,subirImagen,actualizarPromocion).delete(auth,eliminarPromocion).get(getPromocion);
 
 router.route('/promocion/EliminarImagen/:id').delete(auth,deleteImagen);
+
+router.route('/inventario/excel/').put(auth,importacionExcel);
 
 module.exports = router;
