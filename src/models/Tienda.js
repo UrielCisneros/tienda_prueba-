@@ -34,12 +34,10 @@ const TiendaSchema = new Schema({
         lng: String
     }],
     politicas: {
-        type: String,
-        required: true
+        type: String
     },
     imagenCorp: {
-        type: String,
-        required: true
+        type: String
     },
     activo: Boolean,
     imagenLogo:{

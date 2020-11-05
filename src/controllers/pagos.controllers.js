@@ -11,6 +11,7 @@ const politicasModel = require('../models/PoliticasEnvio');
 pagoCtrl.createPago = async (req, res) => {
     try {
         const {sesionStripe,pedidoCompleto,amount} = req.body;
+        console.log(req.body);
         const stripe = new Stripe(process.env.LLAVE_SECRETA_STRIPE);
      
         let sesion = "";
@@ -19,6 +20,7 @@ pagoCtrl.createPago = async (req, res) => {
         }else{
             sesion = sesionStripe.tokenId;
         }
+        
 
        const payment = await stripe.paymentIntents.create({
             amount,
@@ -245,8 +247,8 @@ pagoCtrl.createPago = async (req, res) => {
                         </div>
                         `;
                         
-                        const respuesta = email.sendEmail(pedidoPopulate.cliente.email,"Pedido realizado",htmlContentUser,tienda[0].nombre);
-                        console.log(respuesta);
+                        email.sendEmail(pedidoPopulate.cliente.email,"Pedido realizado",htmlContentUser,tienda[0].nombre);
+
 
                     }
                 }

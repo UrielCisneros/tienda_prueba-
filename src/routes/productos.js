@@ -27,7 +27,8 @@ const {
 	categoriasAgrupadas,
 	subCategorias,
 	getPromocionesPaginadas,
-	importacionExcel
+	importacionExcel,
+	getProductosFiltrosDividos
 } = require('../controllers/productos.controllers');
 const auth = require('../middleware/auth');
 
@@ -40,10 +41,7 @@ router.route('/Subcategorias/:idCategoria').get(auth,subCategorias);
 router.route('/filtrosNavbar/').get(crecarFiltrosNavbar);
 
 
-
-
 /* router.route('/similares/').get(getProductosSimilares) */
-
 router.route('/promocion/carousel/').get(getPromocionCarousel)
 
 router.route('/promocion/').post(auth,subirImagen,crearPromocion).get(getPromociones)
@@ -52,7 +50,9 @@ router.route('/promociones/').get(getPromocionesPaginadas)
 
 router.route('/').get(getProductos).post(auth,subirImagen, createProducto);
 
-router.route('/search').get(getProductosFiltrados)
+router.route('/search').get(getProductosFiltrados);
+
+router.route('/filter').get(getProductosFiltrosDividos);
 
 router.route('/:id').get(getProducto).put(auth,subirImagen, updateProducto).delete(auth,deleteProducto);
 
@@ -68,6 +68,6 @@ router.route('/promocion/:id').put(auth,subirImagen,actualizarPromocion).delete(
 
 router.route('/promocion/EliminarImagen/:id').delete(auth,deleteImagen);
 
-router.route('/inventario/excel/').put(auth,importacionExcel);
+router.route('/import/excel/').post(importacionExcel);
 
 module.exports = router;

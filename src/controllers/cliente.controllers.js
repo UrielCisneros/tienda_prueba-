@@ -371,7 +371,6 @@ clienteCtrl.authFirebase = async (req, res) => {
 	if (cliente) {
 		if (!bcrypt.compareSync(uid, cliente.contrasena)) {
 			res.status(500).json({ message: 'Contraseña incorrecta' });
-			next();
 		} else {
 			const token = jwt.sign(
 				{
