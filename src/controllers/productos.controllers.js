@@ -508,7 +508,7 @@ productosCtrl.subirImagen = (req, res, next) => {
 }; */
 
 productosCtrl.getProductosFiltrosDividos = async (req, res) => {
-	const { categoria, subcategoria, genero } = req.query
+	const { categoria = "", subcategoria = "", genero = "" } = req.query
 
 	var match = {};
 	if(categoria && !subcategoria && !genero){

@@ -18,12 +18,12 @@ router.route('/limite')
     .get(obtenerLimiteCarousels)
 
 router.route('/nuevo/')
-    .post(subirImagen, crearCarousel)
+    .post(auth,subirImagen, crearCarousel)
 
 router.route('/:idCourrucel')
     .get(obtenerCarousel)
-    .put(subirImagen, actualizarCarousel)
-    .delete(eliminarCarousel)
+    .put(auth,subirImagen, actualizarCarousel)
+    .delete(auth,eliminarCarousel)
 
 
 module.exports = router;

@@ -23,7 +23,8 @@ pedidoCtrl.getPedidosAdmin = async (req, res, next) => {
 		const options = {
 			page,
             limit: parseInt(limit),
-            populate: ['cliente', { path: 'pedido.producto', model: 'producto'}]
+            populate: ['cliente', { path: 'pedido.producto', model: 'producto'}],
+            sort: { createdAt: -1 }
 		}
         const pedidos = await pedidoModel.paginate({pagado: true}, options);
         res.status(200).json(pedidos);

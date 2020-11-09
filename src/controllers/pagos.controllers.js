@@ -141,7 +141,7 @@ pagoCtrl.createPago = async (req, res) => {
                                 const producto = await productoModel.findById(pedido.producto);
                                 const newProducto = producto;
                                 if(producto.cantidad == 0 || producto.cantidad < pedido.cantidad){
-                                    res.status(500).send({ message: 'No exixten suficientes en el inventario' })
+                                    res.status(500).send({ message: 'No existen suficientes en el inventario' })
                                     throw error;
                                 }else{
                                     newProducto.cantidad = parseInt(producto.cantidad) - parseInt(pedido.cantidad);

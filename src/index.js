@@ -4,9 +4,13 @@ require('./database');
 
 
 async function main() {
-    await app.listen(app.get('port'),app.get('host'), () => {
+    try {
+        await app.listen(app.get('port')); 
         console.log('Server on port ', app.get('port'));
-    }); 
+    } catch (error) {
+        console.log(error);
+    }
+
 }
 
 

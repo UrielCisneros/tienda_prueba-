@@ -48,6 +48,7 @@ app.use('/api/carrito', require('./routes/carrito'));
 app.use('/api/sugerencia', require('./routes/sugerencia'));
 app.use('/api/carousel', require('./routes/carousel'));
 app.use('/api/politicasEnvio', require('./routes/politicasEnvio'));
+app.use('/api/banner', require('./routes/bannerCategoria'));
 
 //carpeta publica
 app.use(express.static('uploads'));

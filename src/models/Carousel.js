@@ -3,10 +3,7 @@ const { Schema, model } = require('mongoose');
 const CarouselSchema = new Schema({
     producto: String,
     nombre: String,
-    imagenes: [{
-        imagen: String,
-        size: String
-    }]
+    imagen: String
 },
 {
     timestamps: true
