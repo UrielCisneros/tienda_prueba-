@@ -51,7 +51,8 @@ const ClienteSchema = new Schema({
 		required: true
 	},
 	imagen: String,
-	tipoSesion: String
+	tipoSesion: String,
+	aceptarPoliticas: Boolean
 });
 
 ClienteSchema.plugin(mongoodePaginate);

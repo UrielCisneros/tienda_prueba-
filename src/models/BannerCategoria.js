@@ -4,7 +4,8 @@ const bannerCategoria = new Schema({
     categoria: String,
     imagenBanner: String,
     vincularCategoria: Boolean,
-    mostrarProductos: Boolean
+    mostrarProductos: Boolean,
+    mostrarTitulo: Boolean
 },{
     timestamps: true
 })

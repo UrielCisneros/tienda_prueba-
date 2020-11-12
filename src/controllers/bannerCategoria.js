@@ -62,7 +62,7 @@ bannerCtrl.deleteBanner = async (req,res) => {
     try {
         const bannerBase = await modelBanner.findById(req.params.idBanner);
         if(bannerBase){
-            if(bannerBase.imagenBanner || bannerBase.imagenBanner !== ""){
+            if(bannerBase.imagenBanner){
                 await imagen.eliminarImagen(bannerBase.imagenBanner)
             }
             await modelBanner.findByIdAndDelete(req.params.idBanner);

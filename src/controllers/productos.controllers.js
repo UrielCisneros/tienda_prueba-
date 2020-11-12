@@ -36,7 +36,7 @@ productosCtrl.deleteImagen = async (req, res) => {
 	}
 };
 
-productosCtrl.getPromociones = async (req, res) => {
+productosCtrl.getPromociones = async (req, res,next) => {
 	try {
 		const promociones = await promocionModel.find().populate('productoPromocion');
 		res.status(200).json(promociones);

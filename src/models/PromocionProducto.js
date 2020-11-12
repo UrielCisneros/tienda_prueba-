@@ -10,7 +10,9 @@ const PromocionSchema = new Schema({
         ref: 'producto'
     },
     precioPromocion: Float,
-    imagenPromocion: String
+    imagenPromocion: String,
+    idProcionMasiva: String,
+    porsentajePromocionMasiva: String
 });
 
 PromocionSchema.plugin(mongoodePaginate);

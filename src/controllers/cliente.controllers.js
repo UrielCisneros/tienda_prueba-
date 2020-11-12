@@ -96,49 +96,55 @@ clienteCtrl.createCliente = (req, res) => {
 	try {
 		console.log('Datos del body: ');
 		console.log(req.body);
-		const repeatContrasena = req.body.repeatContrasena;
-		const contrasena = req.body.contrasena;
-		const newCliente = new clienteModel(req.body);
-		newCliente.active = false;
-		newCliente.tipoSesion = "APIRestAB";
-		if (!contrasena || !repeatContrasena) {
-			res.status(404).json({ message: 'Las contrasenas son obligatorias' });
-		} else {
-			if (contrasena !== repeatContrasena) {
-				res.status(404).json({ message: 'Las contrasenas no son iguales' });
+		if(req.body.aceptarPoliticas){
+			const repeatContrasena = req.body.repeatContrasena;
+			const contrasena = req.body.contrasena;
+			const newCliente = new clienteModel(req.body);
+			newCliente.active = false;
+			newCliente.tipoSesion = "APIRestAB";
+	
+			if (!contrasena || !repeatContrasena) {
+				res.status(404).json({ message: 'Las contrasenas son obligatorias' });
 			} else {
-				bcrypt.hash(contrasena, null, null, function(err, hash) {
-					if (err) {
-						res.status(500).json({ message: 'Error al encriptar la contrasena', err });
-					} else {
-						newCliente.contrasena = hash;
-						newCliente.save((err, userStored) => {
-							if (err) {
-								res.status(500).json({ message: 'Ups, algo paso al registrar el usuario', err });
-							} else {
-								if (!userStored) {
-									res.status(404).json({ message: 'Error al crear el usuario' });
+				if (contrasena !== repeatContrasena) {
+					res.status(404).json({ message: 'Las contrasenas no son iguales' });
+				} else {
+					bcrypt.hash(contrasena, null, null, function(err, hash) {
+						if (err) {
+							res.status(500).json({ message: 'Error al encriptar la contrasena', err });
+						} else {
+							newCliente.contrasena = hash;
+							newCliente.save((err, userStored) => {
+								if (err) {
+									res.status(500).json({ message: 'Ups, algo paso al registrar el usuario', err });
 								} else {
-									const token = jwt.sign(
-										{
-											email: newCliente.email,
-											nombre: newCliente.nombre,
-											apellido: newCliente.apellido,
-											_id: newCliente._id,
-											tipoSesion: "APIRestAB",
-											rol: false
-										},
-										process.env.AUTH_KEY
-									);
-									console.log('Token: ' + token);
-									res.json({ token });
+									if (!userStored) {
+										res.status(404).json({ message: 'Error al crear el usuario' });
+									} else {
+										const token = jwt.sign(
+											{
+												email: newCliente.email,
+												nombre: newCliente.nombre,
+												apellido: newCliente.apellido,
+												_id: newCliente._id,
+												tipoSesion: "APIRestAB",
+												rol: false
+											},
+											process.env.AUTH_KEY
+										);
+										console.log('Token: ' + token);
+										res.json({ token });
+									}
 								}
-							}
-						});
-					}
-				});
+							});
+						}
+					});
+				}
 			}
+		}else{
+			res.status(404).json({ message: 'Aceptar las politicas.' });
 		}
+
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 		console.log(err);
@@ -369,7 +375,7 @@ clienteCtrl.authFirebase = async (req, res) => {
 	console.log(req.body);
 	const cliente = await clienteModel.findOne({ email });
 	if (cliente) {
-		if (!bcrypt.compareSync(uid, cliente.contrasena)) {
+		if (!bcrypt.compareSync(email, cliente.contrasena)) {
 			res.status(500).json({ message: 'Contraseña incorrecta' });
 		} else {
 			const token = jwt.sign(
@@ -395,8 +401,9 @@ clienteCtrl.authFirebase = async (req, res) => {
 			newcliente.email = email;
 			newcliente.imagen = imagen;
 			newcliente.tipoSesion = "FireBase";
+			newcliente.aceptarPoliticas = true;
 
-			bcrypt.hash(uid, null, null, function(err, hash) {
+			bcrypt.hash(email, null, null, function(err, hash) {
 				if (err) {
 					res.status(500).json({ message: 'Error al encriptar la contrasena', err });
 				} else {
