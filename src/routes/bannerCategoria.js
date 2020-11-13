@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const router = Router();
 const auth = require('../middleware/auth');
-const {subirImagen,createBanner,getBanners,editBanner,deleteBanner} = require('../controllers/bannerCategoria');
+const {subirImagen,createBanner,getBanners,editBanner,deleteBanner,eliminarImagen} = require('../controllers/bannerCategoria');
 
 router.route('/')
     .get(getBanners)
@@ -10,6 +10,8 @@ router.route('/')
 router.route('/:idBanner')
     .put(auth,subirImagen,editBanner)
     .delete(auth,deleteBanner)
+
+router.route('/imagen/:idBanner').put(eliminarImagen);
 
 
 module.exports = router;

@@ -32,6 +32,7 @@ blogCtrl.getBlogs = async (req, res) => {
     });
 }
 
+
 blogCtrl.createBlog = async (req, res) => {
     try {
         if (!req.file) {
