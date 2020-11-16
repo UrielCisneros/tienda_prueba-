@@ -474,30 +474,16 @@ productosCtrl.subirImagen = (req, res, next) => {
 		res.status(500).json({ message: "Error en el servidor",err })
 	}
 }; */
-/* productosCtrl.getProductosSimilares = async (req, res) => {
-	console.log(req.query)
-	const { nombre, categoria, subcategoria } = req.query
+productosCtrl.getProductoSinPaginacion = async (req, res) => {
 	try {
-		await Producto.aggregate([
-			{
-				$match:{
-					$or: [
-						{nombre: { $regex: '.*' + nombre + '.*', $options: 'i' }},
-						{categoria: { $regex: '.*' + categoria + '.*', $options: 'i' }},
-						{subCategoria: { $regex: '.*' + subcategoria + '.*', $options: 'i' }},
-
-					],
-				}
-			}
-		],
-			(err, postStored) => {
+		await Producto.find((err, response) => {
 				if (err) {
 					res.status(500).json({ message: 'Error en el servidor', err });
 				} else {
-					if (!postStored) {
+					if (!response) {
 						res.status(404).json({ message: 'Error al mostrar Productos' });
 					} else {
-						res.status(200).json({ posts: postStored });
+						res.status(200).json(response);
 					}
 				}
 			}
@@ -505,7 +491,7 @@ productosCtrl.subirImagen = (req, res, next) => {
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
-}; */
+};
 
 productosCtrl.getProductosFiltrosDividos = async (req, res) => {
 	const { categoria = "", subcategoria = "", genero = "" } = req.query
@@ -747,9 +733,10 @@ productosCtrl.updateProducto = async (req, res, next) => {
 			nuevoProducto.imagen = productoDeBase.imagen;
 		}
 
-		if(productoDeBase.subCategoria !== nuevoProducto.subCategoria){
+		/* if(productoDeBase.subCategoria !== nuevoProducto.subCategoria){
 			await Producto.updateMany({subCategoria: productoDeBase.subCategoria},{$set:{subCategoria: nuevoProducto.subCategoria}},{multi:true});
-		}
+		} */
+
 		const producto = await Producto.findByIdAndUpdate(req.params.id, nuevoProducto);
 
 		const productoNuevo = await Producto.findById(req.params.id);
@@ -857,7 +844,31 @@ productosCtrl.subCategorias = async (req,res) => {
 productosCtrl.crecarFiltrosNavbar = async (req, res, next) => {
 	try {
 		 await Producto.aggregate([ {"$group" : {_id:"$categoria"}}],async function (err, categorias){
-			await categorias.forEach(async (item,index) => {
+			arrayCategorias = []
+			for(i = 0; i < categorias.length; i++){
+                if(categorias[i]._id !== null){
+					await Producto.aggregate([
+					   {$match:
+						   {
+						   $or: [{categoria: categorias[i]._id}],
+						   }
+					   },
+					   {
+						   $group: { _id: '$subCategoria'}
+					   }
+					   ],async function(err,subCategoriasBase){
+						   arrayCategorias.push({
+							   categoria: categorias[i]._id,
+							   subcCategoria: subCategoriasBase
+						   });
+					   });
+				   }
+                if(categorias.length === i + 1){
+                    res.status(200).json(arrayCategorias);
+                    console.log(arrayCategorias);
+                }
+            }
+			/* await categorias.forEach(async (item,index) => {
 				arrayCategorias = []
 				if(categorias.lenght === (index + 1) ){
 					return arrayCategorias
@@ -886,7 +897,7 @@ productosCtrl.crecarFiltrosNavbar = async (req, res, next) => {
 				res.status(200).json(arrayCategorias);
 			} else {
 				res.status(200).json([]);
-			}
+			} */
 			
 		});
 	} catch (err) {
@@ -897,6 +908,7 @@ productosCtrl.crecarFiltrosNavbar = async (req, res, next) => {
 productosCtrl.importacionExcel = async (req,res) => {
 	try {
 		const {data} = req.body;
+		console.log(data);
 		if(data.length){
 			data.map(async (producto) => {
 				const existProduto = await Producto.find({codigo: producto.Codigo_de_barras});

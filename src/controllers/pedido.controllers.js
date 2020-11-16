@@ -87,6 +87,7 @@ pedidoCtrl.getPedidosUser = async (req, res, next) => {
 
 pedidoCtrl.createPedido = async (req, res, next) => {
     const newpedido = new pedidoModel(req.body);
+    console.log(req.body);
     newpedido.pagado = false;
 /*     newpedido.estado_pedido = "En proceso";
     newpedido.mensaje_admin = "Tu pedido esta siendo procesado"; */
