@@ -11,7 +11,7 @@ const PromocionSchema = new Schema({
     },
     precioPromocion: Float,
     imagenPromocion: String,
-    idProcionMasiva: String,
+    idPromocionMasiva: String,
     porsentajePromocionMasiva: String
 });
 

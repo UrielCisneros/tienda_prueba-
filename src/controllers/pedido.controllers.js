@@ -189,8 +189,7 @@ pedidoCtrl.updateEstadoPedido = async (req, res, next) => {
                     <div style="margin:auto; max-width: 550px; height: 100px;">
                         <p style="padding: 10px 0px;">Ya estamos trabajando para mandar tu pedido, si tienes alguna duda no dudes en contactarnos.</p>
                     </div>
-                </div>
-                `;
+                </div>`;
                 
                 email.sendEmail(pedidoPopulate.cliente.email,"Pedido realizado",htmlContentUser,tienda[0].nombre);
             }else{

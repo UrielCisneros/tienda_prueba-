@@ -38,7 +38,7 @@ productosCtrl.deleteImagen = async (req, res) => {
 
 productosCtrl.getPromociones = async (req, res,next) => {
 	try {
-		const promociones = await promocionModel.find().populate('productoPromocion');
+		const promociones = await promocionModel.find({idPromocionMasiva:{$exists:false}}).populate('productoPromocion');
 		res.status(200).json(promociones);
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
@@ -476,7 +476,17 @@ productosCtrl.subirImagen = (req, res, next) => {
 }; */
 productosCtrl.getProductoSinPaginacion = async (req, res) => {
 	try {
-		await Producto.find((err, response) => {
+		await Producto.aggregate(
+			[
+				{
+					$lookup: {
+						from: 'promocions',
+						localField: '_id',
+						foreignField: 'productoPromocion',
+						as: 'promocion'
+					}
+				}
+			],(err, response) => {
 				if (err) {
 					res.status(500).json({ message: 'Error en el servidor', err });
 				} else {
@@ -554,7 +564,7 @@ productosCtrl.getProductosFiltrosDividos = async (req, res) => {
 						from: 'promocions',
 						localField: '_id',
 						foreignField: 'productoPromocion',
-						as: 'todos'
+						as: 'promocion'
 					}
 				},
 				{
@@ -588,7 +598,7 @@ productosCtrl.getProductosFiltrados = async (req, res) => {
 						from: 'promocions',
 						localField: '_id',
 						foreignField: 'productoPromocion',
-						as: 'todos'
+						as: 'promocion'
 					}
 				},
 				{
@@ -634,7 +644,7 @@ productosCtrl.getProductos = async (req, res) => {
 					from: 'promocions',
 					localField: '_id',
 					foreignField: 'productoPromocion',
-					as: 'todos'
+					as: 'promocion'
 				}
 			}
 		]);
@@ -723,6 +733,7 @@ productosCtrl.createProducto = async (req, res) => {
 productosCtrl.updateProducto = async (req, res, next) => {
 	try {
 		const productoDeBase = await Producto.findById(req.params.id);
+		console.log(req.body);
 		//Construir nuevo producto
 		const nuevoProducto = req.body;
 		//Verificar si mandaron imagen
@@ -753,8 +764,6 @@ productosCtrl.updateProducto = async (req, res, next) => {
 				productoNuevo.activo = false;
 				await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
 			}
-
-
 		}else if(productoNuevo.numeros.length > 0){
 			console.log("entro a numero");
 			let contador = 0;
@@ -845,8 +854,12 @@ productosCtrl.crecarFiltrosNavbar = async (req, res, next) => {
 	try {
 		 await Producto.aggregate([ {"$group" : {_id:"$categoria"}}],async function (err, categorias){
 			arrayCategorias = []
+			console.log(categorias);
+			console.log(categorias.length);
 			for(i = 0; i < categorias.length; i++){
+				console.log(i);
                 if(categorias[i]._id !== null){
+					console.log("entro",i);
 					await Producto.aggregate([
 					   {$match:
 						   {
@@ -857,17 +870,21 @@ productosCtrl.crecarFiltrosNavbar = async (req, res, next) => {
 						   $group: { _id: '$subCategoria'}
 					   }
 					   ],async function(err,subCategoriasBase){
+						   console.log(subCategoriasBase);
+						   console.log(categorias[i]._id);
 						   arrayCategorias.push({
 							   categoria: categorias[i]._id,
 							   subcCategoria: subCategoriasBase
 						   });
 					   });
 				   }
-                if(categorias.length === i + 1){
+				   
+                /* if(categorias.length === (i + 1)){
                     res.status(200).json(arrayCategorias);
-                    console.log(arrayCategorias);
-                }
-            }
+                } */
+			}
+			res.status(200).json(arrayCategorias);
+			console.log(arrayCategorias);
 			/* await categorias.forEach(async (item,index) => {
 				arrayCategorias = []
 				if(categorias.lenght === (index + 1) ){

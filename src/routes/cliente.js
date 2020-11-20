@@ -12,8 +12,17 @@ const {
 	subirImagen,
 	authCliente,
 	authFirebase,
-	getClientesFiltrados
+	getClientesFiltrados,
+	getClienteSinPaginacion,
+	restablecerPassword,
+	cambioResetPass
 } = require('../controllers/cliente.controllers');
+
+router.route('/todos').get(auth,getClienteSinPaginacion)
+
+router.route('/restablecer/pass').post(restablecerPassword);
+
+router.route('/restablecer/pass/:idPassword').put(cambioResetPass);
 
 router.route('/auth').post(authCliente);
 

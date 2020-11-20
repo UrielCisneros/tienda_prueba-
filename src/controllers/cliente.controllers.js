@@ -4,6 +4,9 @@ const bcrypt = require('bcrypt-nodejs');
 const jwt = require('jsonwebtoken');
 const clienteModel = require('../models/Cliente');
 const adminModel = require('../models/Administrador');
+const email = require('../middleware/sendEmail');
+const Tienda = require('../models/Tienda');
+const recuperacionModel = require('../models/RecuperacionPass');
 
 clienteCtrl.subirImagen = async (req, res, next) => {
 	await imagen.upload(req, res, function(err) {
@@ -13,6 +16,67 @@ clienteCtrl.subirImagen = async (req, res, next) => {
 		return next();
 	});
 };
+
+clienteCtrl.getClienteSinPaginacion = async (req,res) => {
+	try {
+		const clientes = await clienteModel.find({});
+		res.status(200).json(clientes);
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ message: 'Error en el servidor', error });
+	}
+}
+
+clienteCtrl.cambioResetPass = async (req,res) => {
+	try {
+		const datos = await recuperacionModel.find({codigoVerificacion: req.params.idPassword});
+		console.log(datos);
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ message: 'Error en el servidor', error });
+	}
+}
+
+clienteCtrl.restablecerPassword = async (req,res) => {
+	try {
+		const { emailCliente } = req.body;
+		const newRecuperacion = new recuperacionModel({
+			correoUsuario: emailCliente,
+			codigoVerificacion: makeid(100),
+			activo: false
+		})
+
+		await newRecuperacion.save();
+
+		const tienda = await Tienda.find();
+		const htmlContentUser = `
+                <div>                    
+                    <h3 style="font-family: sans-serif; margin: 15px 15px;">Escuchamos que perdió su contraseña. ¡Lo siento por eso!</h3>
+                    <h4 style="font-family: sans-serif; margin: 15px 15px;">¡Pero no se preocupe! Se puede utilizar el siguiente enlace para restablecer la contraseña:</h4>
+					<a href="https://brave-yonath-783630.netlify.app/">https://brave-yonath-783630.netlify.app/</a>
+                    <div style="margin:auto; max-width: 550px; height: 100px;">
+                        <p style="padding: 10px 0px;">Al utilizar este codigo ya no podra volverse a usar.</p>
+                    </div>
+				</div>`;
+
+		await email.sendEmail(emailCliente,"Recuperacion",htmlContentUser,tienda[0].nombre);
+		res.status(200).json({message: "Correo enviado."});
+
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ message: 'Error en el servidor', error });
+	}
+}
+
+function makeid(length) {
+	var result = '';
+	var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	var charactersLength = characters.length;
+	for ( var i = 0; i < length; i++ ) {
+	   result += characters.charAt(Math.floor(Math.random() * charactersLength));
+	}
+	return result;
+ }
 
 /* clienteCtrl.getClientes = async (req, res, next) => {
 	try {
