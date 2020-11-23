@@ -15,14 +15,17 @@ const {
 	getClientesFiltrados,
 	getClienteSinPaginacion,
 	restablecerPassword,
-	cambioResetPass
+	getVerificPass,
+	resetPass
 } = require('../controllers/cliente.controllers');
 
 router.route('/todos').get(auth,getClienteSinPaginacion)
 
 router.route('/restablecer/pass').post(restablecerPassword);
 
-router.route('/restablecer/pass/:idPassword').put(cambioResetPass);
+router.route('/restablecer/pass/:idPassword').put(getVerificPass);
+
+router.route('/reset/pass').put(resetPass);
 
 router.route('/auth').post(authCliente);
 

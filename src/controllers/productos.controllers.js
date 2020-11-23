@@ -860,23 +860,25 @@ productosCtrl.crecarFiltrosNavbar = async (req, res, next) => {
 				console.log(i);
                 if(categorias[i]._id !== null){
 					console.log("entro",i);
-					await Producto.aggregate([
-					   {$match:
-						   {
-						   $or: [{categoria: categorias[i]._id}],
-						   }
-					   },
-					   {
-						   $group: { _id: '$subCategoria'}
-					   }
-					   ],async function(err,subCategoriasBase){
-						   console.log(subCategoriasBase);
-						   console.log(categorias[i]._id);
-						   arrayCategorias.push({
-							   categoria: categorias[i]._id,
-							   subcCategoria: subCategoriasBase
-						   });
-					   });
+					if(categorias[i]._id){
+						await Producto.aggregate([
+							{$match:
+								{
+								$or: [{categoria: categorias[i]._id}],
+								}
+							},
+							{
+								$group: { _id: '$subCategoria'}
+							}
+							],async function(err,subCategoriasBase){
+								console.log(subCategoriasBase);
+								console.log(categorias[i]._id);
+								arrayCategorias.push({
+									categoria: categorias[i]._id,
+									subcCategoria: subCategoriasBase
+								});
+							});
+					}
 				   }
 				   
                 /* if(categorias.length === (i + 1)){

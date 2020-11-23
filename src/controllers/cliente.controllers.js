@@ -17,20 +17,153 @@ clienteCtrl.subirImagen = async (req, res, next) => {
 	});
 };
 
-clienteCtrl.getClienteSinPaginacion = async (req,res) => {
+clienteCtrl.cambioCodigoVerific = async (req,res) => {
 	try {
-		const clientes = await clienteModel.find({});
-		res.status(200).json(clientes);
+		const datos = await recuperacionModel.find({codigoVerificacion: req.params.idPassword});
+		console.log(datos);
+		if(datos.activo){
+			res.status(500).json({ message: 'Error en el servidor', error });
+		}else{
+			const nuevoDatos = datos;
+			nuevoDatos.activo = true;
+			await recuperacionModel.findByIdAndUpdate(datos._id,nuevoDatos);
+			res.status(200).json(datos);
+		}
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ message: 'Error en el servidor', error });
 	}
 }
 
-clienteCtrl.cambioResetPass = async (req,res) => {
+clienteCtrl.getClienteSinPaginacion = async (req,res) => {
 	try {
-		const datos = await recuperacionModel.find({codigoVerificacion: req.params.idPassword});
+		try {
+			const clientes = await clienteModel.find();
+			res.status(200).json(clientes);
+		} catch (err) {
+			res.status(500).json({ message: "Error en el servidor",err })	
+			console.log(error);
+		}
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ message: 'Error en el servidor', error });
+	}
+}
+
+clienteCtrl.resetPass = async (req,res) => {
+	try {
+		const {password, confirmPassword,idRecuperacion} = req.body;
+		const datos = await recuperacionModel.findOne({codigoVerificacion: idRecuperacion});
+		const admin = await adminModel.findOne({email: datos.correoUsuario});
+		if(admin){
+			const newAdmin = admin;
+			if (!password || !confirmPassword) {
+				res.status(404).json({ message: 'Las contrasenas son obligatorias' });
+			} else {
+				if (password !== confirmPassword) {
+					res.status(404).json({ message: 'Las contrasenas no son iguales' });
+				} else {
+					bcrypt.hash(password, null, null, function(err, hash) {
+						if (err) {
+							res.status(500).json({ message: 'Error al encriptar la contrasena', err });
+						} else {
+							newAdmin.contrasena = hash;
+							newAdmin.save((err, userStored) => {
+								if (err) {
+									res.status(500).json({ message: 'Ups, algo paso al registrar el usuario', err });
+								} else {
+									if (!userStored) {
+										res.status(404).json({ message: 'Error al crear el usuario' });
+									} else {
+										const token = jwt.sign(
+											{
+												email: newAdmin.email,
+												nombre: newAdmin.nombre,
+												_id: newAdmin._id,
+												rol: true
+											},
+											process.env.AUTH_KEY
+										);
+										console.log('Token: ' + token);
+										res.json({ token });
+
+									}
+								}
+							});
+						}
+					});
+				}
+			}
+		}else{
+			const Cliente = await clienteModel.findOne({email: datos.correoUsuario});
+			const newCliente = Cliente;
+			if(Cliente.tipoSesion !== 'APIRestAB'){
+				res.status(500).json({ message: 'Esta cuenta no se puede cambiar la contrasena' });
+			}else{
+				if (!password || !confirmPassword) {
+					res.status(404).json({ message: 'Las contrasenas son obligatorias' });
+				} else {
+					if (password !== confirmPassword) {
+						res.status(404).json({ message: 'Las contrasenas no son iguales' });
+					} else {
+						bcrypt.hash(password, null, null, function(err, hash) {
+							if (err) {
+								res.status(500).json({ message: 'Error al encriptar la contrasena', err });
+							} else {
+								newCliente.contrasena = hash;
+								newCliente.save((err, userStored) => {
+									if (err) {
+										res.status(500).json({ message: 'Ups, algo paso al registrar el usuario', err });
+									} else {
+										if (!userStored) {
+											res.status(404).json({ message: 'Error al crear el usuario' });
+										} else {
+											const token = jwt.sign(
+												{
+													email: newCliente.email,
+													nombre: newCliente.nombre,
+													apellido: newCliente.apellido,
+													_id: newCliente._id,
+													tipoSesion: newCliente.tipoSesion,
+													imagen: newCliente.imagen,
+													rol: false
+												},
+												process.env.AUTH_KEY
+											);
+											console.log('Token: ' + token);
+											res.json({ token });
+	
+										}
+									}
+								});
+							}
+						});
+					}
+				}
+			}
+		}
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ message: 'Error en el servidor', error });
+	}
+}
+
+clienteCtrl.getVerificPass = async (req,res) => {
+	try {
+		const datos = await recuperacionModel.findOne({codigoVerificacion: req.params.idPassword});
 		console.log(datos);
+		if(datos){
+			if(!datos.activo){
+				const newDate = datos;
+				newDate.activo = true;
+				await recuperacionModel.findByIdAndUpdate(datos._id,newDate);
+				res.status(200).json({ message: 'Codigo real'});
+			}else{
+				res.status(404).json({ message: 'Codigo usado'});
+			}
+		}else{
+			res.status(404).json({ message: 'No existe'});
+		}
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ message: 'Error en el servidor', error });
@@ -49,12 +182,13 @@ clienteCtrl.restablecerPassword = async (req,res) => {
 		await newRecuperacion.save();
 
 		const tienda = await Tienda.find();
+		const urlReset = `https://brave-yonath-783630.netlify.app/resetPass/${newRecuperacion.codigoVerificacion}`;
 		const htmlContentUser = `
                 <div>                    
                     <h3 style="font-family: sans-serif; margin: 15px 15px;">Escuchamos que perdió su contraseña. ¡Lo siento por eso!</h3>
                     <h4 style="font-family: sans-serif; margin: 15px 15px;">¡Pero no se preocupe! Se puede utilizar el siguiente enlace para restablecer la contraseña:</h4>
-					<a href="https://brave-yonath-783630.netlify.app/">https://brave-yonath-783630.netlify.app/</a>
-                    <div style="margin:auto; max-width: 550px; height: 100px;">
+					<a href="${urlReset}">${urlReset}</a>
+                    <div style=" max-width: 550px; height: 100px;">
                         <p style="padding: 10px 0px;">Al utilizar este codigo ya no podra volverse a usar.</p>
                     </div>
 				</div>`;
