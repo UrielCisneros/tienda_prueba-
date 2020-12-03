@@ -536,30 +536,37 @@ clienteCtrl.authCliente = async (req, res, next) => {
 	} else {
 		try {
 			const cliente = await clienteModel.findOne({ email });
-			console.log(cliente, contrasena);
+			
 			if (!cliente) {
 				res.status(404).json({ message: 'Este usuario no existe' });
 			} else {
-				if (!bcrypt.compareSync(contrasena, cliente.contrasena)) {
-					console.log('entro');
-					res.status(500).json({ message: 'Contraseña incorrecta' });
-					next();
-				} else {
-					const token = jwt.sign(
-						{
-							email: cliente.email,
-							nombre: cliente.nombre,
-							apellido: cliente.apellido,
-							_id: cliente._id,
-							tipoSesion: "APIRestAB",
-							imagen: cliente.imagen,
-							rol: false
-						},
-						process.env.AUTH_KEY
-					);
-					//token
-					res.json({ token });
+				console.log(cliente);
+				console.log(cliente.tipoSesion);
+				if(cliente.tipoSesion === 'APIRestAB'){
+					if (!bcrypt.compareSync(contrasena, cliente.contrasena)) {
+						console.log('entro');
+						res.status(500).json({ message: 'Contraseña incorrecta' });
+						next();
+					} else {
+						const token = jwt.sign(
+							{
+								email: cliente.email,
+								nombre: cliente.nombre,
+								apellido: cliente.apellido,
+								_id: cliente._id,
+								tipoSesion: "APIRestAB",
+								imagen: cliente.imagen,
+								rol: false
+							},
+							process.env.AUTH_KEY
+						);
+						//token
+						res.json({ token });
+					}
+				}else{
+					res.status(500).json({ message: 'Este usuario esta registrado Google.'});
 				}
+
 			}
 		} catch (err) {
 			console.log(err);
