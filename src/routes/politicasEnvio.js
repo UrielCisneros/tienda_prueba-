@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const router = Router();
-const { getPoliticas,createPoliticas,updatePoliticas,getEstados,createEstados,editEstados } = require('../controllers/politicasEnvio.controllers');
+const { getPoliticas,createPoliticas,updatePoliticas,getEstados,createEstados,editEstados,deleteEstados } = require('../controllers/politicasEnvio.controllers');
 const auth = require('../middleware/auth');
 
 router.route('/')
@@ -11,6 +11,8 @@ router.route('/')
 router.route('/:id')
     .put(auth,updatePoliticas)//Update a admin
 
-router.route('/estados/').post(createEstados).get(getEstados).put(editEstados)
+router.route('/estados/').post(auth,createEstados).get(getEstados);
+
+router.route('/estados/:idEstado').put(editEstados).delete(deleteEstados);
 
 module.exports = router;

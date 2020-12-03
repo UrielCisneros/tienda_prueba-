@@ -45,6 +45,7 @@ productosCtrl.getPromociones = async (req, res,next) => {
 		next();
 	}
 };
+
 productosCtrl.getPromocionesPaginadas = async (req, res) => {
 	try {
 		const { page = 1, limit = 10 } = req.query;
@@ -474,6 +475,7 @@ productosCtrl.subirImagen = (req, res, next) => {
 		res.status(500).json({ message: "Error en el servidor",err })
 	}
 }; */
+
 productosCtrl.getProductoSinPaginacion = async (req, res) => {
 	try {
 		await Producto.aggregate(
@@ -626,6 +628,87 @@ productosCtrl.getProductosFiltrados = async (req, res) => {
 				}
 			}
 		);
+	} catch (err) {
+		res.status(500).json({ message: 'Error en el servidor', err });
+	}
+};
+
+productosCtrl.getProductosFiltradosAdmin = async (req, res) => {
+	const { codigo, nombre, categoria, subcategoria, genero, color } = req.query
+	try {
+		await Producto.aggregate(
+			[
+				{
+					$lookup: {
+						from: 'promocions',
+						localField: '_id',
+						foreignField: 'productoPromocion',
+						as: 'promocion'
+					}
+				},
+				{
+					$match: {
+						$or: [
+							{ codigo: { $regex: '.*' + codigo + '.*', $options: 'i' } },
+							{ nombre: { $regex: '.*' + nombre + '.*', $options: 'i' } },
+							{ categoria: { $regex: '.*' + categoria + '.*', $options: 'i' } },
+							{ subCategoria: { $regex: '.*' + subcategoria + '.*', $options: 'i' } },
+							{ genero: { $regex: '.*' + genero + '.*', $options: 'i' } },
+							{ color: { $regex: '.*' + color + '.*', $options: 'i' } }
+						]
+						
+					}
+				}
+			],
+			(err, postStored) => {
+				if (err) {
+					res.status(500).json({ message: 'Error en el servidor', err });
+				} else {
+					if (!postStored) {
+						res.status(404).json({ message: 'Error al mostrar Productos' });
+					} else {
+						res.status(200).json({ posts: postStored });
+					}
+				}
+			}
+		);
+	} catch (err) {
+		res.status(500).json({ message: 'Error en el servidor', err });
+	}
+};
+
+productosCtrl.getProductosIndividuales = async (req, res) => {
+	try {
+		const { page = 1, limit = 20 } = req.query;
+		const options = {
+			page,
+			limit: parseInt(limit)
+		};
+		const aggregate = Producto.aggregate([
+			{
+				$lookup: {
+					from: 'promocions',
+					localField: '_id',
+					foreignField: 'productoPromocion',
+					as: 'promocion'
+				}
+			},
+			{
+				$match: {'tipoCategoria': req.query.tipoCategoria}
+			}
+		]);
+
+		await Producto.aggregatePaginate(aggregate, options, (err, postStored) => {
+			if (err) {
+				res.status(500).json({ message: 'Error en el servidor', err });
+			} else {
+				if (!postStored) {
+					res.status(404).json({ message: 'Error al mostrar Productos' });
+				} else {
+					res.status(200).json({ posts: postStored });
+				}
+			}
+		});
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
@@ -821,6 +904,15 @@ productosCtrl.generosAgrupados = async (req,res) => {
 	}
 }
 
+productosCtrl.tipoCategoriasAgrupadas = async (req,res) => {
+	try {
+		 const categorias = await Producto.aggregate([ {"$group" : {_id:"$tipoCategoria"}}]).sort('_id');
+		 res.status(200).json(categorias);
+	} catch (err) {
+		res.status(500).json({ message: 'Error en el servidor', err });
+	}
+}
+
 productosCtrl.categoriasAgrupadas = async (req,res) => {
 	try {
 		 const categorias = await Producto.aggregate([ {"$group" : {_id:"$categoria"}}]);
@@ -951,5 +1043,154 @@ productosCtrl.importacionExcel = async (req,res) => {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
 }
+
+productosCtrl.actualizarInventario = async (req, res) => {
+	try {
+		const { cantidad, medida, accion } = req.body;
+		const productoBD = await Producto.findById(req.params.id);
+		if (productoBD.tipoCategoria === 'Calzado') {
+			const numeros = productoBD.numeros.filter((numero) => numero._id == medida);
+			if (!numeros.length) {
+				res.status(500).json({ message: 'Esta talla no existe' });
+			} else {
+				numeros.map(async (numero) => {
+					let nuevaCantidad;
+					if (accion === 'sumar') {
+						nuevaCantidad = numero.cantidad + cantidad;
+					} else {
+						nuevaCantidad = numero.cantidad - cantidad;
+					}
+
+					if (nuevaCantidad < 0) {
+						res.status(404).json({ message: 'No puedes restar más de lo que hay actualmente' });
+					} else {
+						await Producto.updateOne(
+							{
+								'numeros._id': medida
+							},
+							{
+								$set: { 'numeros.$': { numero: numero.numero, cantidad: nuevaCantidad } }
+							},
+							async (err, response) => {
+								if (err) {
+									res.status(500).json({ message: 'Ups algo paso al actualizar', err });
+								} else {
+									if (!response) {
+										res.status(404).json({ message: 'Error al actualizar' });
+									} else {
+										res.status(200).json({ message: 'Se actualizo con exito' });
+										const productoNuevo = await Producto.findById(req.params.id);
+										let contador = 0;
+										for (let i = 0; i < productoNuevo.numeros.length; i++) {
+											contador += productoNuevo.numeros[i].cantidad;
+										}
+										if (contador > 0) {
+											productoNuevo.activo = true;
+											await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+										} else {
+											productoNuevo.activo = false;
+											await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+										}
+									}
+								}
+							}
+						);
+					}
+				});
+			}
+		} else if (productoBD.tipoCategoria === 'Ropa') {
+			const tallas = productoBD.tallas.filter((talla) => talla._id == medida);
+			if (!tallas.length) {
+				res.status(500).json({ message: 'Esta talla no existe' });
+			} else {
+				tallas.map(async (talla) => {
+					let nuevaCantidad;
+					if (accion === 'sumar') {
+						nuevaCantidad = talla.cantidad + cantidad;
+					} else {
+						nuevaCantidad = talla.cantidad - cantidad;
+					}
+
+					if (nuevaCantidad < 0) {
+						res.status(404).json({ message: 'No puedes restar más de lo que hay actualmente' });
+					} else {
+						await Producto.updateOne(
+							{
+								'tallas._id': medida
+							},
+							{
+								$set: { 'tallas.$': { talla: talla.talla, cantidad: nuevaCantidad } }
+							},
+							async (err, response) => {
+								if (err) {
+									res.status(500).json({ message: 'Ups algo paso al actualizar', err });
+								} else {
+									if (!response) {
+										res.status(404).json({ message: 'Error al actualizar' });
+									} else {
+										res.status(200).json({ message: 'Se actualizo con exito' });
+										const productoNuevo = await Producto.findById(req.params.id);
+										let contador = 0;
+										for (let i = 0; i < productoNuevo.tallas.length; i++) {
+											contador += productoNuevo.tallas[i].cantidad;
+										}
+										if (contador > 0) {
+											productoNuevo.activo = true;
+											await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+										} else {
+											productoNuevo.activo = false;
+											await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+										}
+									}
+								}
+							}
+						);
+					}
+				});
+			}
+		} else {
+			let nuevaCantidad;
+			if (accion === 'sumar') {
+				nuevaCantidad = productoBD.cantidad + cantidad;
+			} else {
+				nuevaCantidad = productoBD.cantidad - cantidad;
+			}
+
+			if (nuevaCantidad < 0) {
+				res.status(404).json({ message: 'No puedes restar más de lo que hay actualmente' });
+			} else {
+				await Producto.updateOne(
+					{
+						_id: req.params.id
+					},
+					{
+						$set: { cantidad: nuevaCantidad }
+					},
+					async (err, response) => {
+						if (err) {
+							res.status(500).json({ message: 'Ups algo paso al actualizar', err });
+						} else {
+							if (!response) {
+								res.status(404).json({ message: 'Error al actualizar' });
+							} else {
+								res.status(200).json({ message: 'Se actualizo con exito' });
+								const productoNuevo = await Producto.findById(req.params.id);
+								if (productoNuevo.cantidad > 0) {
+									productoNuevo.activo = true;
+									await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+								} else {
+									productoNuevo.activo = false;
+									await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+								}
+							}
+						}
+					}
+				);
+			}
+		}
+	} catch (err) {
+		res.status(500).json({ message: 'Error en el servidor', err });
+	}
+};
 
 module.exports = productosCtrl;

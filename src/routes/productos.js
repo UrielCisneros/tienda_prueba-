@@ -25,17 +25,23 @@ const {
 	getProductosFiltrados,
 	crecarFiltrosNavbar,
 	categoriasAgrupadas,
+	tipoCategoriasAgrupadas,
 	subCategorias,
 	getPromocionesPaginadas,
 	importacionExcel,
 	getProductosFiltrosDividos,
-	getProductoSinPaginacion
+	getProductoSinPaginacion,
+	getProductosIndividuales,
+	actualizarInventario,
+	getProductosFiltradosAdmin
 } = require('../controllers/productos.controllers');
 const auth = require('../middleware/auth');
 
 router.route('/agrupar/generos').get(generosAgrupados);
 
 router.route('/categorias/').get(auth,categoriasAgrupadas);
+
+router.route('/tipoCategorias/').get(auth,tipoCategoriasAgrupadas);
 
 router.route('/Subcategorias/:idCategoria').get(auth,subCategorias);
 
@@ -52,6 +58,8 @@ router.route('/promociones/').get(getPromocionesPaginadas)
 router.route('/').get(getProductos).post(auth,subirImagen, createProducto);
 
 router.route('/search').get(getProductosFiltrados);
+
+router.route('/search/admin').get(getProductosFiltradosAdmin);
 
 router.route('/filter').get(getProductosFiltrosDividos);
 
@@ -70,5 +78,14 @@ router.route('/promocion/:id').put(auth,subirImagen,actualizarPromocion).delete(
 router.route('/promocion/EliminarImagen/:id').delete(auth,deleteImagen);
 
 router.route('/inventario/excel/').put(auth,importacionExcel);
+
+/* Actualizar inventario */
+
+router.route('/inventario/:id').put(auth,actualizarInventario);
+
+/* filtros indiviudales para otros, tallas y numeros */
+
+router.route('/filter/individuales').get(getProductosIndividuales);
+
 
 module.exports = router;

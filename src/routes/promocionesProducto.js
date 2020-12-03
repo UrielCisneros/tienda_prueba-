@@ -4,10 +4,10 @@ const auth = require('../middleware/auth');
 const { createPromocionMasiva, getPromocionMasiva ,editPromocionMasiva, promocionLimitante,deletePromocionMasiva } = require('../controllers/promocionProductos.controllers');
 
 
-router.route('/masiva/').get(getPromocionMasiva).post(createPromocionMasiva);
+router.route('/masiva/').get(getPromocionMasiva).post(auth,createPromocionMasiva);
 
-router.route('/masiva/:idPromocionMasiva').delete(deletePromocionMasiva).put(editPromocionMasiva)
+router.route('/masiva/:idPromocionMasiva').delete(auth,deletePromocionMasiva).put(auth,editPromocionMasiva)
 
-router.route('/limitante/').post(promocionLimitante)
+router.route('/limitante/').post(auth,promocionLimitante)
 
 module.exports = router;
