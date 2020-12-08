@@ -45,7 +45,8 @@ const ProductoSchema = new mongoose.Schema({
 		type: String, 
 		trim: true
 	},
-	activo: Boolean
+	activo: Boolean,
+	eliminado: Boolean
 });
 
 ProductoSchema.plugin(mongoodePaginate);

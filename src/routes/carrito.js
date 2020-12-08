@@ -14,7 +14,7 @@ const {
 
 
 router.route('/nuevo/:idCliente')
-    .post(auth,crearCarrito, agregarArticulo)
+    .post(crearCarrito, agregarArticulo)
 
 router.route('/:idCliente', auth)
     .get(auth,obtenerCarrito)

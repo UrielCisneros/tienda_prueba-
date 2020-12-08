@@ -300,6 +300,7 @@ clienteCtrl.createCliente = (req, res) => {
 			const newCliente = new clienteModel(req.body);
 			newCliente.active = false;
 			newCliente.tipoSesion = "APIRestAB";
+			newCliente.modalMunicipio = false;
 	
 			if (!contrasena || !repeatContrasena) {
 				res.status(404).json({ message: 'Las contrasenas son obligatorias' });

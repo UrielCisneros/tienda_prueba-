@@ -10,9 +10,9 @@ const Carrito = require('../models/Carrito');
 
 apartadoCtrl.agregarApartado = async (req, res) => {
 	console.log(req.body);
-	const { producto, cliente, cantidad, estado, medida, tipoEntrega } = req.body;
+	const { producto, cliente, cantidad, estado, medida, tipoEntrega,precio } = req.body;
 	const datosProducto = await Producto.find({ _id: producto });
-	const newApartado = new Apartado({ producto, cliente, cantidad, estado, medida, tipoEntrega });
+	const newApartado = new Apartado({ producto, cliente, cantidad, estado, medida, tipoEntrega, precio });
 	newApartado.eliminado = false;
 	const clienteBase = await clienteModel.findById(cliente);
 	const admin = await adminModel.find({});

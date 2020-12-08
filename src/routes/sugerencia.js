@@ -10,7 +10,7 @@ const {
 } = require('../controllers/sugerencia.controllers');
 
 router.route('/nueva/:idProducto')
-    .post(auth,crearSugerencia)
+    .post(crearSugerencia)
 
 router.route('/:idProducto')
     .get(obtenerSugerencia)

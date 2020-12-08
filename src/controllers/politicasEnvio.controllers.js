@@ -87,9 +87,27 @@ politicasCtrl.deleteEstados = async (req,res) => {
         }
     } catch (err) {
         console.log(err);
-        res.status(500).json({ message: "Error en el servidor",err })
+        res.status(500).json({ message: "Error en el servidor",err });
     }
 }
+
+politicasCtrl.compararEstados = async (req,res) => {
+    try {
+        console.log(req.params.idMunicipio);
+        const estadosMunicipios = await estadosModel.find({'municipios.municipio': req.params.idMunicipio});
+        if(estadosMunicipios.length > 0){
+            res.status(200).json({ message: "Si hay envio a tu municipio." });
+        }else{
+            res.status(404).json({ message: "No hay envios a tu municipio, estamos trabajando para hacerlo!!" });
+        }
+        
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Error en el servidor",err });
+    }
+}
+
+
 
 
 

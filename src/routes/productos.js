@@ -49,11 +49,11 @@ router.route('/filtrosNavbar/').get(crecarFiltrosNavbar);
 
 router.route('/sinPaginacion/').get(getProductoSinPaginacion);
 
-router.route('/promocion/carousel/').get(getPromocionCarousel)
+router.route('/promocion/carousel/').get(getPromocionCarousel);
 
-router.route('/promocion/').post(auth,subirImagen,crearPromocion).get(getPromociones)
+router.route('/promocion/').post(auth, subirImagen,crearPromocion).get(getPromociones);
 
-router.route('/promociones/').get(getPromocionesPaginadas)
+router.route('/promociones/').get(getPromocionesPaginadas);
 
 router.route('/').get(getProductos).post(auth,subirImagen, createProducto);
 
@@ -63,7 +63,7 @@ router.route('/search/admin').get(getProductosFiltradosAdmin);
 
 router.route('/filter').get(getProductosFiltrosDividos);
 
-router.route('/:id').get(getProducto).put(auth,subirImagen, updateProducto).delete(auth,deleteProducto);
+router.route('/:id').get(getProducto).put(auth,subirImagen, updateProducto).delete(deleteProducto);
 
 router.route('/addTalla/:id').post(auth,addTalla);
 

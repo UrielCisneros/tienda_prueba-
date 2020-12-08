@@ -79,6 +79,8 @@ carritoCtrl.crearCarrito = async (req, res, next) => {
 									res.status(200).json({ message: 'Carrito creado', response });
 								}
 							});
+						}else{
+							res.status(404).json({ messege: 'La talla no existe'});
 						}
 					});
 				} else if (!productos.tallas.length) {
@@ -108,7 +110,10 @@ carritoCtrl.crearCarrito = async (req, res, next) => {
 									res.status(200).json({ message: 'Carrito creado', response });
 								}
 							});
+						}else{
+							res.status(404).json({ messege: 'El numero no existe'});
 						}
+						
 					});
 				}
 			}

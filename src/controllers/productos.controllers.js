@@ -2,6 +2,10 @@ const productosCtrl = {};
 const imagen = require('./uploadFile.controllers');
 const Producto = require('../models/Producto');
 const promocionModel = require('../models/PromocionProducto');
+const sugerenciaModel = require('../models/Sugerencia');
+const galeriaModel = require('../models/Galeria');
+const corouselModel = require('../models/Carousel');
+const carritoModel = require('../models/Carrito');
 const mongoose = require('mongoose')
 const util = require('util')
 const sleep = util.promisify(setTimeout);
@@ -36,9 +40,11 @@ productosCtrl.deleteImagen = async (req, res) => {
 	}
 };
 
-productosCtrl.getPromociones = async (req, res,next) => {
+productosCtrl.getPromociones = async (req, res, next) => {
 	try {
-		const promociones = await promocionModel.find({idPromocionMasiva:{$exists:false}}).populate('productoPromocion');
+		const promociones = await promocionModel
+			.find({ idPromocionMasiva: { $exists: false } })
+			.populate('productoPromocion');
 		res.status(200).json(promociones);
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
@@ -52,21 +58,21 @@ productosCtrl.getPromocionesPaginadas = async (req, res) => {
 		const options = {
 			page,
 			limit: parseInt(limit),
-			populate: ['productoPromocion']
-		}
+			populate: [ 'productoPromocion' ]
+		};
 		await promocionModel.paginate({}, options, (err, postStored) => {
 			if (err) {
-				res.status(500).json({  message: "Error en el servidor", err });
+				res.status(500).json({ message: 'Error en el servidor', err });
 			} else {
 				if (!postStored) {
-					res.status(404).json({ message: "Error al mostrar promociones" })
+					res.status(404).json({ message: 'Error al mostrar promociones' });
 				} else {
 					res.status(200).json({ posts: postStored });
 				}
 			}
 		});
 	} catch (err) {
-		res.status(500).json({ message: "Error en el servidor",err })
+		res.status(500).json({ message: 'Error en el servidor', err });
 	}
 };
 
@@ -104,13 +110,13 @@ productosCtrl.getPromocionCarousel = async (req, res, next) => {
 			.limit(10);
 		res.status(200).json(promocion);
 		/* promocion.aggregate([ { $sample: { size: 10 } } ]) */
-    } catch (err) {
-        res.status(500).json({ message: "Error en el servidor",err })	
-        next();
-    }
-}
+	} catch (err) {
+		res.status(500).json({ message: 'Error en el servidor', err });
+		next();
+	}
+};
 
-productosCtrl.crearPromocion = async (req,res) => {
+productosCtrl.crearPromocion = async (req, res) => {
 	try {
 		const newPromocion = new promocionModel(req.body);
 		if (req.file) {
@@ -130,7 +136,7 @@ productosCtrl.crearPromocion = async (req,res) => {
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
-}
+};
 
 productosCtrl.actualizarPromocion = async (req, res) => {
 	try {
@@ -164,20 +170,19 @@ productosCtrl.actualizarPromocion = async (req, res) => {
 productosCtrl.eliminarPromocion = async (req, res) => {
 	try {
 		const promocionBase = await promocionModel.findById(req.params.id);
-		if(promocionBase){
+		if (promocionBase) {
 			if (promocionBase.imagenPromocion) {
 				await imagen.eliminarImagen(promocionBase.imagenPromocion);
 			}
-		
+
 			const promocion = await promocionModel.findByIdAndDelete(req.params.id);
 			if (!promocion) {
 				res.status(404).json({ message: 'Este promocion no existe' });
 			}
 			res.status(200).json({ message: 'Promocion eliminada' });
-		}else{
+		} else {
 			res.status(404).json({ message: 'Este promocion no existe' });
 		}
-
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
@@ -208,15 +213,15 @@ productosCtrl.actualizarNumero = async (req, res) => {
 							res.status(200).json({ message: 'Se actualizo con exito' });
 							const productoNuevo = await Producto.findById(req.params.id);
 							let contador = 0;
-							for(let i = 0; i < productoNuevo.numeros.length; i++){
+							for (let i = 0; i < productoNuevo.numeros.length; i++) {
 								contador += productoNuevo.numeros[i].cantidad;
 							}
-							if(contador > 0){
-								productoNuevo.activo  = true;
-								await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
-							}else{
-								productoNuevo.activo  = false;
-								await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
+							if (contador > 0) {
+								productoNuevo.activo = true;
+								await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+							} else {
+								productoNuevo.activo = false;
+								await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
 							}
 						}
 					}
@@ -253,15 +258,15 @@ productosCtrl.actualizarTalla = async (req, res) => {
 							res.status(200).json({ message: 'Se actualizo con exito' });
 							const productoNuevo = await Producto.findById(req.params.id);
 							let contador = 0;
-							for(let i = 0; i < productoNuevo.tallas.length; i++){
+							for (let i = 0; i < productoNuevo.tallas.length; i++) {
 								contador += productoNuevo.tallas[i].cantidad;
 							}
-							if(contador > 0){
-								productoNuevo.activo  = true;
-								await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
-							}else{
-								productoNuevo.activo  = false;
-								await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
+							if (contador > 0) {
+								productoNuevo.activo = true;
+								await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+							} else {
+								productoNuevo.activo = false;
+								await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
 							}
 						}
 					}
@@ -361,15 +366,15 @@ productosCtrl.addTalla = async (req, res, next) => {
 						res.status(200).json({ message: 'talla guardada' });
 						const productoNuevo = await Producto.findById(req.params.id);
 						let contador = 0;
-						for(let i = 0; i < productoNuevo.tallas.length; i++){
+						for (let i = 0; i < productoNuevo.tallas.length; i++) {
 							contador += productoNuevo.tallas[i].cantidad;
 						}
-						if(contador > 0){
+						if (contador > 0) {
 							productoNuevo.activo = true;
-							await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
-						}else{
+							await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+						} else {
 							productoNuevo.activo = false;
-							await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
+							await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
 						}
 					}
 				}
@@ -406,15 +411,15 @@ productosCtrl.addnumero = async (req, res, next) => {
 						res.status(200).json({ message: 'numero guardado' });
 						const productoNuevo = await Producto.findById(req.params.id);
 						let contador = 0;
-						for(let i = 0; i < productoNuevo.numeros.length; i++){
+						for (let i = 0; i < productoNuevo.numeros.length; i++) {
 							contador += productoNuevo.numeros[i].cantidad;
 						}
-						if(contador > 0){
-							productoNuevo.activo  = true;
-							await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
-						}else{
-							productoNuevo.activo  = false;
-							await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
+						if (contador > 0) {
+							productoNuevo.activo = true;
+							await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+						} else {
+							productoNuevo.activo = false;
+							await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
 						}
 					}
 				}
@@ -481,6 +486,11 @@ productosCtrl.getProductoSinPaginacion = async (req, res) => {
 		await Producto.aggregate(
 			[
 				{
+					$match: {
+						$or: [ { eliminado: { $exists: false } }, { eliminado: false } ]
+					}
+				},
+				{
 					$lookup: {
 						from: 'promocions',
 						localField: '_id',
@@ -488,7 +498,8 @@ productosCtrl.getProductoSinPaginacion = async (req, res) => {
 						as: 'promocion'
 					}
 				}
-			],(err, response) => {
+			],
+			(err, response) => {
 				if (err) {
 					res.status(500).json({ message: 'Error en el servidor', err });
 				} else {
@@ -506,58 +517,59 @@ productosCtrl.getProductoSinPaginacion = async (req, res) => {
 };
 
 productosCtrl.getProductosFiltrosDividos = async (req, res) => {
-	const { categoria = "", subcategoria = "", genero = "" } = req.query
+	const { categoria = '', subcategoria = '', genero = '' } = req.query;
 
 	var match = {};
-	if(categoria && !subcategoria && !genero){
+	if (categoria && !subcategoria && !genero) {
 		match = {
-			$and: [
-				{ categoria: { $regex: '.*' + categoria + '.*', $options: 'i' } },
-			]
-		}
-	}else if( categoria && subcategoria && !genero){
+			$or: [ { eliminado: { $exists: false } }, { eliminado: false } ],
+			$and: [ { categoria: { $regex: '.*' + categoria + '.*', $options: 'i' } } ]
+		};
+	} else if (categoria && subcategoria && !genero) {
 		match = {
+			$or: [ { eliminado: { $exists: false } }, { eliminado: false } ],
 			$and: [
 				{ categoria: { $regex: '.*' + categoria + '.*', $options: 'i' } },
 				{ subCategoria: { $regex: '.*' + subcategoria + '.*', $options: 'i' } }
 			]
-		}
-	}else if (categoria && subcategoria && genero){
+		};
+	} else if (categoria && subcategoria && genero) {
 		match = {
-			'$and': [
+			$or: [ { eliminado: { $exists: false } }, { eliminado: false } ],
+			$and: [
 				{ categoria: { $regex: '.*' + categoria + '.*', $options: 'i' } },
 				{ subCategoria: { $regex: '.*' + subcategoria + '.*', $options: 'i' } },
 				{ genero: { $regex: '.*' + genero + '.*', $options: 'i' } }
 			]
-		}
-	}else if(subcategoria && !categoria && !genero){
+		};
+	} else if (subcategoria && !categoria && !genero) {
 		match = {
-			'$and': [
-				{ subCategoria: { '$regex': '.*' + subcategoria + '.*', '$options': 'i' } }
-			]
-		}
-	}else if(subcategoria && genero && !categoria){
+			$or: [ { eliminado: { $exists: false } }, { eliminado: false } ],
+			$and: [ { subCategoria: { $regex: '.*' + subcategoria + '.*', $options: 'i' } } ]
+		};
+	} else if (subcategoria && genero && !categoria) {
 		match = {
-			'$and': [
-				{ subCategoria: { '$regex': '.*' + subcategoria + '.*', '$options': 'i' } },
-				{ genero: { '$regex': '.*' + genero + '.*', '$options': 'i' } }
+			$or: [ { eliminado: { $exists: false } }, { eliminado: false } ],
+			$and: [
+				{ subCategoria: { $regex: '.*' + subcategoria + '.*', $options: 'i' } },
+				{ genero: { $regex: '.*' + genero + '.*', $options: 'i' } }
 			]
-		}
-	}else if(categoria && genero && !subcategoria){
+		};
+	} else if (categoria && genero && !subcategoria) {
 		match = {
-			'$and': [
-				{ categoria: { '$regex': '.*' + categoria + '.*', '$options': 'i' } },
-				{ genero: { '$regex': '.*' + genero + '.*', '$options': 'i' } }
+			$or: [ { eliminado: { $exists: false } }, { eliminado: false } ],
+			$and: [
+				{ categoria: { $regex: '.*' + categoria + '.*', $options: 'i' } },
+				{ genero: { $regex: '.*' + genero + '.*', $options: 'i' } }
 			]
-		}
-	}else if(genero && !categoria && !subcategoria){
+		};
+	} else if (genero && !categoria && !subcategoria) {
 		match = {
-			'$and': [
-				{ genero: { '$regex': '.*' + genero + '.*', '$options': 'i' } }
-			]
-		}
+			$or: [ { eliminado: { $exists: false } }, { eliminado: false } ],
+			$and: [ { genero: { $regex: '.*' + genero + '.*', $options: 'i' } } ]
+		};
 	}
-	
+
 	try {
 		await Producto.aggregate(
 			[
@@ -591,7 +603,7 @@ productosCtrl.getProductosFiltrosDividos = async (req, res) => {
 };
 
 productosCtrl.getProductosFiltrados = async (req, res) => {
-	const { nombre, categoria, subcategoria, genero, color } = req.query
+	const { nombre, categoria, subcategoria, genero, color } = req.query;
 	try {
 		await Producto.aggregate(
 			[
@@ -611,8 +623,8 @@ productosCtrl.getProductosFiltrados = async (req, res) => {
 							{ subCategoria: { $regex: '.*' + subcategoria + '.*', $options: 'i' } },
 							{ genero: { $regex: '.*' + genero + '.*', $options: 'i' } },
 							{ color: { $regex: '.*' + color + '.*', $options: 'i' } }
-						]
-						
+						],
+						$and: [ { $or: [ { eliminado: { $exists: false } }, { eliminado: false } ] } ]
 					}
 				}
 			],
@@ -634,7 +646,7 @@ productosCtrl.getProductosFiltrados = async (req, res) => {
 };
 
 productosCtrl.getProductosFiltradosAdmin = async (req, res) => {
-	const { codigo, nombre, categoria, subcategoria, genero, color } = req.query
+	const { codigo, nombre, categoria, subcategoria, genero, color } = req.query;
 	try {
 		await Producto.aggregate(
 			[
@@ -655,8 +667,8 @@ productosCtrl.getProductosFiltradosAdmin = async (req, res) => {
 							{ subCategoria: { $regex: '.*' + subcategoria + '.*', $options: 'i' } },
 							{ genero: { $regex: '.*' + genero + '.*', $options: 'i' } },
 							{ color: { $regex: '.*' + color + '.*', $options: 'i' } }
-						]
-						
+						],
+						$and: [ { $or: [ { eliminado: { $exists: false } }, { eliminado: false } ] } ]
 					}
 				}
 			],
@@ -694,7 +706,10 @@ productosCtrl.getProductosIndividuales = async (req, res) => {
 				}
 			},
 			{
-				$match: {'tipoCategoria': req.query.tipoCategoria}
+				$match: {
+					tipoCategoria: req.query.tipoCategoria,
+					$or: [ { eliminado: { $exists: false } }, { eliminado: false } ]
+				}
 			}
 		]);
 
@@ -722,6 +737,11 @@ productosCtrl.getProductos = async (req, res) => {
 			limit: parseInt(limit)
 		};
 		const aggregate = Producto.aggregate([
+			{
+				$match: {
+					$or: [ { eliminado: { $exists: false } }, { eliminado: false } ]
+				}
+			},
 			{
 				$lookup: {
 					from: 'promocions',
@@ -753,7 +773,8 @@ productosCtrl.getProducto = async (req, res, next) => {
 		const producto = await Producto.aggregate([
 			{
 				$match: {
-					_id: mongoose.Types.ObjectId(req.params.id)
+					_id: mongoose.Types.ObjectId(req.params.id),
+					$or: [ { eliminado: { $exists: false } }, { eliminado: false } ]
 				}
 			},
 			{
@@ -771,7 +792,7 @@ productosCtrl.getProducto = async (req, res, next) => {
 		}
 		res.status(200).json(producto[0]);
 	} catch (err) {
-		console.log(err)
+		console.log(err);
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
 };
@@ -834,40 +855,40 @@ productosCtrl.updateProducto = async (req, res, next) => {
 		const producto = await Producto.findByIdAndUpdate(req.params.id, nuevoProducto);
 
 		const productoNuevo = await Producto.findById(req.params.id);
-		
-		if(productoNuevo.tallas.length > 0){
+
+		if (productoNuevo.tallas.length > 0) {
 			let contador = 0;
-			for(let i = 0; i < productoNuevo.tallas.length; i++){
+			for (let i = 0; i < productoNuevo.tallas.length; i++) {
 				contador += productoNuevo.tallas[i].cantidad;
 			}
-			if(contador > 0){
+			if (contador > 0) {
 				productoNuevo.activo = true;
-				await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
-			}else{
+				await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+			} else {
 				productoNuevo.activo = false;
-				await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
+				await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
 			}
-		}else if(productoNuevo.numeros.length > 0){
-			console.log("entro a numero");
+		} else if (productoNuevo.numeros.length > 0) {
+			console.log('entro a numero');
 			let contador = 0;
-			for(let i = 0; i < productoNuevo.numeros.length; i++){
+			for (let i = 0; i < productoNuevo.numeros.length; i++) {
 				contador += productoNuevo.numeros[i].cantidad;
 			}
 			console.log(contador);
-			if(contador > 0){
-				productoNuevo.activo  = true;
-				await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
-			}else{
-				productoNuevo.activo  = false;
-				await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
+			if (contador > 0) {
+				productoNuevo.activo = true;
+				await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+			} else {
+				productoNuevo.activo = false;
+				await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
 			}
-		}else{
-			if(productoNuevo.cantidad > 0){
-				productoNuevo.activo  = true;
-				await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
-			}else{
-				productoNuevo.activo  = false;
-				await Producto.findByIdAndUpdate(productoNuevo._id,productoNuevo);
+		} else {
+			if (productoNuevo.cantidad > 0) {
+				productoNuevo.activo = true;
+				await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
+			} else {
+				productoNuevo.activo = false;
+				await Producto.findByIdAndUpdate(productoNuevo._id, productoNuevo);
 			}
 		}
 		res.status(200).json({ message: 'Producto actualizado', producto });
@@ -880,106 +901,194 @@ productosCtrl.updateProducto = async (req, res, next) => {
 
 productosCtrl.deleteProducto = async (req, res, next) => {
 	try {
-		const productoDeBase = await Producto.findById(req.params.id);
-		if (productoDeBase.imagen) {
-			await imagen.eliminarImagen(productoDeBase.imagen);
+		const idProducto = req.params.id;
+		const ProductoBase = await Producto.findById(idProducto);
+		const newProducto = ProductoBase;
+		
+		newProducto.eliminado = true;
+
+		await Producto.findByIdAndUpdate(idProducto,newProducto);
+
+		const galeriaProducto = await galeriaModel.findOne({producto: idProducto});
+		console.log(galeriaProducto);
+		if(galeriaProducto){
+			if(galeriaProducto.imagenes.length > 0){
+				galeriaProducto.imagenes.map(async (imagenGaleria) => {
+					await imagen.eliminarImagen(imagenGaleria.url);
+				})
+			}
+			await galeriaModel.findByIdAndDelete(galeriaProducto._id);
 		}
 
-		const producto = await Producto.findByIdAndDelete(req.params.id);
-		if (!producto) {
-			res.status(500).json({ message: 'Este producto no existe' });
+		const promocionProducto = await promocionModel.findOne({productoPromocion: idProducto})
+		console.log(promocionProducto);
+		if(promocionProducto){
+			await promocionModel.findByIdAndDelete(promocionProducto._id);
 		}
+
+		const carouselProducto = await corouselModel.findOne({producto: idProducto});
+		console.log(carouselProducto);
+		if(carouselProducto){
+			await corouselModel.findByIdAndDelete(carouselProducto._id);
+		}
+
+		const sugerenciaProducto = await sugerenciaModel.findOne({producto: idProducto});
+		console.log(sugerenciaProducto);
+		if(sugerenciaProducto){
+			await sugerenciaModel.findByIdAndDelete(sugerenciaProducto._id);
+		}
+
+		const sugerenciaDesugerenciaProducto = await sugerenciaModel.findOne({'sugerencias.producto': idProducto});
+		console.log(sugerenciaDesugerenciaProducto);
+		if(sugerenciaDesugerenciaProducto){
+			await sugerenciaModel.findByIdAndDelete(sugerenciaDesugerenciaProducto._id);
+		}
+
+		/* const carritoProducto = await carritoModel.find({'articulos.idarticulo': idProducto});
+		console.log(carritoProducto);
+
+		if(carritoProducto.length > 0){
+			carritoProducto.map((carrito) => {
+				if(carrito.articulos.length > 0){
+					carrito.articulos.map(async (articulo) => {
+						if(articulo.idarticulo.equals(idProducto)){
+							await carritoModel.updateOne(
+								{
+									cliente: carrito.cliente
+								},
+								{ $pull: { articulos: { _id: articulo._id } } }
+							);
+						}
+					});
+				}
+			})
+		} */
 		res.status(200).json({ message: 'Producto eliminado' });
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
 };
 
-productosCtrl.generosAgrupados = async (req,res) => {
+productosCtrl.generosAgrupados = async (req, res) => {
 	try {
-		 const genero = await Producto.aggregate([ {"$group" : {_id:"$genero"}}]);
-		 res.status(200).json(genero);
+		const genero = await Producto.aggregate([
+			{
+				$match: {
+					$or: [ { eliminado: { $exists: false } }, { eliminado: false } ]
+				}
+			},
+			{
+				$group: { _id: '$genero' }
+			}
+		]);
+		res.status(200).json(genero);
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
-}
+};
 
-productosCtrl.tipoCategoriasAgrupadas = async (req,res) => {
+productosCtrl.tipoCategoriasAgrupadas = async (req, res) => {
 	try {
-		 const categorias = await Producto.aggregate([ {"$group" : {_id:"$tipoCategoria"}}]).sort('_id');
-		 res.status(200).json(categorias);
+		const categorias = await Producto.aggregate([
+			{
+				$match: {
+					$or: [ { eliminado: { $exists: false } }, { eliminado: false } ]
+				}
+			},
+			{ $group: { _id: '$tipoCategoria' } }
+		]).sort('_id');
+		res.status(200).json(categorias);
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
-}
+};
 
-productosCtrl.categoriasAgrupadas = async (req,res) => {
+productosCtrl.categoriasAgrupadas = async (req, res) => {
 	try {
-		 const categorias = await Producto.aggregate([ {"$group" : {_id:"$categoria"}}]);
-		 res.status(200).json(categorias);
+		const categorias = await Producto.aggregate([
+			{
+				$match: {
+					$or: [ { eliminado: { $exists: false } }, { eliminado: false } ]
+				}
+			},
+			{ $group: { _id: '$categoria' } }
+		]);
+		res.status(200).json(categorias);
 		console.log(categorias);
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
-}
+};
 
-productosCtrl.subCategorias = async (req,res) => {
+productosCtrl.subCategorias = async (req, res) => {
 	try {
 		const subCategorias = await Producto.aggregate([
-			{$match:
-			  {
-				$or: [{categoria: req.params.idCategoria}],
-			  }
+			{
+				$match: {
+					$or: [ { eliminado: { $exists: false } }, { eliminado: false } ],
+					$and: [ { categoria: req.params.idCategoria } ]
+				}
 			},
 			{
-			  $group: { _id: '$subCategoria'}
+				$group: { _id: '$subCategoria' }
 			}
-		  ]);
-		  res.status(200).json(subCategorias);
+		]);
+		res.status(200).json(subCategorias);
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
-
-}
+};
 
 productosCtrl.crecarFiltrosNavbar = async (req, res, next) => {
 	try {
-		 await Producto.aggregate([ {"$group" : {_id:"$categoria"}}],async function (err, categorias){
-			arrayCategorias = []
-			console.log(categorias);
-			console.log(categorias.length);
-			for(i = 0; i < categorias.length; i++){
-				console.log(i);
-                if(categorias[i]._id !== null){
-					console.log("entro",i);
-					if(categorias[i]._id){
-						await Producto.aggregate([
-							{$match:
-								{
-								$or: [{categoria: categorias[i]._id}],
-								}
-							},
-							{
-								$group: { _id: '$subCategoria'}
-							}
-							],async function(err,subCategoriasBase){
-								console.log(subCategoriasBase);
-								console.log(categorias[i]._id);
-								arrayCategorias.push({
-									categoria: categorias[i]._id,
-									subcCategoria: subCategoriasBase
-								});
-							});
+		await Producto.aggregate(
+			[
+				{
+					$match: {
+						$or: [ { eliminado: { $exists: false } }, { eliminado: false } ]
 					}
-				   }
-				   
-                /* if(categorias.length === (i + 1)){
+				},
+				{ $group: { _id: '$categoria' } }
+			],
+			async function(err, categorias) {
+				arrayCategorias = [];
+				console.log(categorias);
+				console.log(categorias.length);
+				for (i = 0; i < categorias.length; i++) {
+					console.log(i);
+					if (categorias[i]._id !== null) {
+						console.log('entro', i);
+						if (categorias[i]._id) {
+							await Producto.aggregate(
+								[
+									{
+										$match: {
+											$or: [ { categoria: categorias[i]._id } ]
+										}
+									},
+									{
+										$group: { _id: '$subCategoria' }
+									}
+								],
+								async function(err, subCategoriasBase) {
+									console.log(subCategoriasBase);
+									console.log(categorias[i]._id);
+									arrayCategorias.push({
+										categoria: categorias[i]._id,
+										subcCategoria: subCategoriasBase
+									});
+								}
+							);
+						}
+					}
+
+					/* if(categorias.length === (i + 1)){
                     res.status(200).json(arrayCategorias);
                 } */
-			}
-			res.status(200).json(arrayCategorias);
-			console.log(arrayCategorias);
-			/* await categorias.forEach(async (item,index) => {
+				}
+				res.status(200).json(arrayCategorias);
+				console.log(arrayCategorias);
+				/* await categorias.forEach(async (item,index) => {
 				arrayCategorias = []
 				if(categorias.lenght === (index + 1) ){
 					return arrayCategorias
@@ -1009,40 +1118,39 @@ productosCtrl.crecarFiltrosNavbar = async (req, res, next) => {
 			} else {
 				res.status(200).json([]);
 			} */
-			
-		});
+			}
+		);
 	} catch (err) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
 };
 
-productosCtrl.importacionExcel = async (req,res) => {
+productosCtrl.importacionExcel = async (req, res) => {
 	try {
-		const {data} = req.body;
+		const { data } = req.body;
 		console.log(data);
-		if(data.length){
+		if (data.length) {
 			data.map(async (producto) => {
-				const existProduto = await Producto.find({codigo: producto.Codigo_de_barras});
-				if(existProduto){
+				const existProduto = await Producto.find({ codigo: producto.Codigo_de_barras });
+				if (existProduto) {
 					await Producto.updateOne(
 						{
-							'codigo': producto.Codigo_de_barras
+							codigo: producto.Codigo_de_barras
 						},
 						{
-							$set: { 'cantidad': producto.Cantidad }
+							$set: { cantidad: producto.Cantidad }
 						}
-					)
+					);
 				}
-			})
-			res.status(200).json({message: "Productos actualizados."});
-		}else{
+			});
+			res.status(200).json({ message: 'Productos actualizados.' });
+		} else {
 			res.status(500).json({ message: 'Archivo no valido.', err });
 		}
-		
 	} catch (error) {
 		res.status(500).json({ message: 'Error en el servidor', err });
 	}
-}
+};
 
 productosCtrl.actualizarInventario = async (req, res) => {
 	try {

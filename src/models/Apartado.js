@@ -14,6 +14,9 @@ const ApartadoSchema = new Schema({
     cantidad: {
         type: Number,
     },
+    precio: {
+        type: String
+    },
     medida: [{
         talla: String,
         numero: String

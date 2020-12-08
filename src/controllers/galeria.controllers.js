@@ -15,12 +15,12 @@ galeriaCtrl.subirImagen = (req, res, next) => {
 galeriaCtrl.crearGaleria = async (req, res, next) => {
     const galeria = await Galeria.findOne({ producto: req.params.idProducto})
     if(!galeria){
-        const {producto} = req.body;
+        //const {producto} = req.body;
         if(!req.file){
             res.status(404).json({message: 'La Galeria al menos debe tener una imagen'})
         }else{
             const newGaleria = new Galeria({
-                producto: producto,
+                producto: req.params.idProducto,
                 imagenes: [{
                     url: req.file.key
                 }]
