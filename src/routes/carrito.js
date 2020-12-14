@@ -9,7 +9,8 @@ const {
     obtenerCarrito,
     eliminarCarrito, 
     eliminarArticulo,
-    modificarCantidadArticulo
+    modificarCantidadArticulo,
+    eliminarAntesDeObtener
 } = require('../controllers/carrito.controllers');
 
 
@@ -17,7 +18,7 @@ router.route('/nuevo/:idCliente')
     .post(crearCarrito, agregarArticulo)
 
 router.route('/:idCliente', auth)
-    .get(auth,obtenerCarrito)
+    .get(auth, eliminarAntesDeObtener, obtenerCarrito)
     .delete(auth,eliminarCarrito)
 
 router.route('/:idCliente/articulo/:idArticulo')
