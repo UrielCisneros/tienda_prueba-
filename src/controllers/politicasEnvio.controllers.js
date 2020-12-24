@@ -55,9 +55,15 @@ politicasCtrl.getEstados = async (req,res) => {
 
 politicasCtrl.createEstados = async (req,res) => {
     try {
-        console.log(req.body);
-        const newEstado = new estadosModel(req.body);
-        await newEstado.save();
+        const estadosMunicipios = await estadosModel.find({});
+        if(estadosMunicipios.length > 0){
+            await estadosModel.deleteOne({todos: true});
+            const newEstado = new estadosModel(req.body);
+            await newEstado.save();
+        }else{
+            const newEstado = new estadosModel(req.body);
+            await newEstado.save();
+        }
         res.status(200).json({ message: 'Estado registrado' });
     } catch (err) {
         console.log(err);
@@ -67,8 +73,14 @@ politicasCtrl.createEstados = async (req,res) => {
 
 politicasCtrl.editEstados = async (req,res) => {
     try {
-        const newEstado = req.body;
-        await estadosModel.findByIdAndUpdate(req.params.idEstado, newEstado);
+        if(req.params.idEstado === "todos"){
+            await estadosModel.deleteMany();
+            const newEstado = new estadosModel({todos: true});
+            await newEstado.save();
+        }else{
+            const newEstado = req.body;
+            await estadosModel.findByIdAndUpdate(req.params.idEstado, newEstado);
+        }
         res.status(200).json({ message: 'Estado actualizado' });
     } catch (err) {
         console.log(err);
@@ -100,7 +112,6 @@ politicasCtrl.compararEstados = async (req,res) => {
         }else{
             res.status(404).json({ message: "No hay envios a tu municipio, estamos trabajando para hacerlo!!" });
         }
-        
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Error en el servidor",err });

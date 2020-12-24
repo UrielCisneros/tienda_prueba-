@@ -139,7 +139,7 @@ pedidoCtrl.updateEstadoPedido = async (req, res, next) => {
                 let subTotal = 0;
                 
                 for(let i = 0; i < pedidoPopulate.pedido.length; i++){
-                    subTotal += parseFloat(pedidoPopulate.pedido[i].precio);
+                    subTotal += (parseFloat(pedidoPopulate.pedido[i].cantidad) * parseFloat(pedidoPopulate.pedido[i].precio));
                     pedidos += `
                     <tr>
                         <td style="  padding: 15px; text-align: left;"><img style="max-width: 150px; display:block; margin:auto;" class="" src="${process.env.URL_IMAGEN_AWS}${pedidoPopulate.pedido[i].producto.imagen}" /></td>
@@ -211,7 +211,7 @@ pedidoCtrl.updateEstadoPedido = async (req, res, next) => {
                 let subTotal = 0;
                 
                 for(let i = 0; i < pedidoPopulate.pedido.length; i++){
-                    subTotal += parseFloat(pedidoPopulate.pedido[i].precio);
+                    subTotal += (parseFloat(pedidoPopulate.pedido[i].cantidad) * parseFloat(pedidoPopulate.pedido[i].precio));
                     pedidos += `
                     <tr>
                         <td style="  padding: 15px; text-align: left;"><img style="max-width: 150px; display:block; margin:auto;" class="" src="${process.env.URL_IMAGEN_AWS}${pedidoPopulate.pedido[i].producto.imagen}" /></td>

@@ -180,7 +180,7 @@ apartadoCtrl.createApartadoMultiple = async (req,res) => {
 
 		for(let i = 0; i < apartadoMultiple.length; i++){
 			const product = await Producto.findById(apartadoMultiple[i].producto);
-			subTotal += parseFloat(apartadoMultiple[i].precio);
+			subTotal += (parseFloat(apartadoMultiple[i].cantidad) * parseFloat(apartadoMultiple[i].precio));
 			pedidos += `
 			<tr>
 				<td style="  padding: 15px; text-align: left;"><img style="max-width: 150px; display:block; margin:auto;" class="" src="${process.env.URL_IMAGEN_AWS}${product.imagen}" /></td>
@@ -1142,7 +1142,7 @@ apartadoCtrl.actualizarApartado = async (req, res) => {
 		let subTotal = 0;
 		for(let i = 0; i < apartadoMultiple.length; i++){
 			const product = await Producto.findById(apartadoMultiple[i].producto);
-			subTotal += parseFloat(apartadoMultiple[i].precio);
+			subTotal += (parseFloat(apartadoMultiple[i].cantidad) * parseFloat(apartadoMultiple[i].precio));
 			pedidos += `
 			<tr>
 				<td style="  padding: 15px; text-align: left;"><img style="max-width: 150px; display:block; margin:auto;" class="" src="${process.env.URL_IMAGEN_AWS}${product.imagen}" /></td>
