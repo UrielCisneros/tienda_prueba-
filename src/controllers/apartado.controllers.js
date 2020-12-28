@@ -1250,7 +1250,7 @@ apartadoCtrl.obtenerUnApartado = async (req, res) => {
 };
 
 apartadoCtrl.eliminarApartadoCambiarEstado = async (req, res) => {
-	const estadoApartado = req.body;
+	console.log(req.params.idApartado);
 	await Apartado.findOneAndUpdate({ _id: req.params.idApartado }, { eliminado: true }, (err, response) => {
 		if (err) {
 			res.status(500).json({ message: 'Hubo un error al actualizar el apartado', err });
